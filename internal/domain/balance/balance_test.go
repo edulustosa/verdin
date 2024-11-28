@@ -51,13 +51,13 @@ func createUser(ctx context.Context, t testing.TB) uuid.UUID {
 	t.Helper()
 	userRepo := new(user.MemoryRepo)
 
-	createdUser, _ := userRepo.Create(ctx, entities.User{
+	id, _ := userRepo.Create(ctx, entities.User{
 		Username:     "John Doe",
 		Email:        "johndoe@email.com",
 		PasswordHash: "$2a$10$3Q",
 	})
 
-	return createdUser.ID
+	return id
 }
 
 func buildSUT(t testing.TB) balance.Service {
