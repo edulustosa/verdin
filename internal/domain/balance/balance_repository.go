@@ -10,6 +10,7 @@ import (
 
 type Repository interface {
 	Create(context.Context, *entities.Balance) (*entities.Balance, error)
+	FindByID(context.Context, uuid.UUID) (*entities.Balance, error)
 	FindByMonth(
 		ctx context.Context,
 		userID uuid.UUID,

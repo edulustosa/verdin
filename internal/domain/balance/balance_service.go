@@ -2,6 +2,7 @@ package balance
 
 import (
 	"context"
+	"time"
 
 	"github.com/edulustosa/verdin/internal/domain/entities"
 	"github.com/edulustosa/verdin/pkg/utils"
@@ -10,6 +11,12 @@ import (
 
 type Service interface {
 	Create(ctx context.Context, userID uuid.UUID) (*entities.Balance, error)
+	FindByID(context.Context, uuid.UUID) (*entities.Balance, error)
+	FindByMonth(
+		ctx context.Context,
+		userID uuid.UUID,
+		month time.Month,
+	) (*entities.Balance, error)
 }
 
 type service struct {
@@ -36,4 +43,16 @@ func (s *service) Create(
 	}
 
 	return s.repo.Create(ctx, &balance)
+}
+
+func (s *service) FindByMonth(
+	ctx context.Context,
+	userID uuid.UUID,
+	month time.Month,
+) (*entities.Balance, error) {
+	return s.repo.FindByMonth(ctx, userID, month)
+}
+
+func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.Balance, error) {
+	return s.repo.FindByID(ctx, id)
 }

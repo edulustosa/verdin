@@ -10,4 +10,5 @@ import (
 type Repository interface {
 	FindByEmail(ctx context.Context, email string) (*entities.User, error)
 	Create(ctx context.Context, user entities.User) (uuid.UUID, error)
+	FindByID(context.Context, uuid.UUID) (*entities.User, error)
 }

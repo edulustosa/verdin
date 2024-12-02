@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/edulustosa/verdin/internal/domain/entities"
+	"github.com/google/uuid"
 )
 
 type Service interface {
 	Create(context.Context, entities.Account) (*entities.Account, error)
+	FindByID(context.Context, uuid.UUID) (*entities.Account, error)
 }
 
 type service struct {
@@ -25,4 +27,8 @@ func (s *service) Create(
 	account entities.Account,
 ) (*entities.Account, error) {
 	return s.repo.Create(ctx, account)
+}
+
+func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.Account, error) {
+	return s.repo.FindByID(ctx, id)
 }

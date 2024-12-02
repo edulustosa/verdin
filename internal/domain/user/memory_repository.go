@@ -22,6 +22,16 @@ func (r *MemoryRepo) Create(_ context.Context, user entities.User) (uuid.UUID, e
 	return user.ID, nil
 }
 
+func (r *MemoryRepo) FindByID(_ context.Context, id uuid.UUID) (*entities.User, error) {
+	for _, u := range r.Users {
+		if u.ID == id {
+			return &u, nil
+		}
+	}
+
+	return nil, errors.New("user not found")
+}
+
 func (r *MemoryRepo) FindByEmail(_ context.Context, email string) (*entities.User, error) {
 	for _, u := range r.Users {
 		if u.Email == email {

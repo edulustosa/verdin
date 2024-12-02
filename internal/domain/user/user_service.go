@@ -12,6 +12,7 @@ import (
 type Service interface {
 	FindByEmail(ctx context.Context, email string) (*entities.User, error)
 	Create(ctx context.Context, user entities.User) (uuid.UUID, error)
+	FindByID(context.Context, uuid.UUID) (*entities.User, error)
 }
 
 type service struct {
@@ -36,6 +37,10 @@ func (s *service) FindByEmail(ctx context.Context, email string) (*entities.User
 	return s.repo.FindByEmail(ctx, email)
 }
 
+func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.User, error) {
+	return s.repo.FindByID(ctx, id)
+}
+
 func (s *service) Create(ctx context.Context, user entities.User) (uuid.UUID, error) {
 	userID, err := s.repo.Create(ctx, user)
 	if err != nil {
@@ -49,11 +54,8 @@ func (s *service) Create(ctx context.Context, user entities.User) (uuid.UUID, er
 
 	_, err = s.account.Create(ctx, entities.Account{
 		UserID: userID,
-		Title:  "Carteira",
+		Title:  "Wallet",
 	})
-	if err != nil {
-		return uuid.Nil, err
-	}
 
-	return userID, nil
+	return userID, err
 }

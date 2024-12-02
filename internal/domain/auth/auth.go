@@ -26,7 +26,7 @@ var (
 	ErrUserAlreadyExists  = errors.New("user already exists")
 )
 
-func (a *Auth) Login(ctx context.Context, login *dtos.LoginDTO) (uuid.UUID, error) {
+func (a *Auth) Login(ctx context.Context, login *dtos.Login) (uuid.UUID, error) {
 	user, err := a.user.FindByEmail(ctx, login.Email)
 	if err != nil {
 		return uuid.Nil, ErrInvalidCredentials
@@ -45,7 +45,7 @@ func (a *Auth) Login(ctx context.Context, login *dtos.LoginDTO) (uuid.UUID, erro
 
 func (a *Auth) Register(
 	ctx context.Context,
-	register *dtos.RegisterDTO,
+	register *dtos.Register,
 ) (uuid.UUID, error) {
 	_, err := a.user.FindByEmail(ctx, register.Email)
 	if err == nil {

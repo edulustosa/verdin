@@ -1,9 +1,8 @@
-package entities
+package dtos
 
 import "github.com/google/uuid"
 
-type Category struct {
-	ID     uuid.UUID `json:"id"`
+type CreateCategory struct {
 	UserID uuid.UUID `json:"userId"`
 	Name   string    `json:"name"`
 	Theme  string    `json:"theme"`

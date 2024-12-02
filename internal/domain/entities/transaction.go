@@ -11,6 +11,7 @@ type Transaction struct {
 	UserID     uuid.UUID       `json:"userId"`
 	CategoryID uuid.UUID       `json:"categoryId"`
 	AccountID  uuid.UUID       `json:"accountId"`
+	BalanceID  uuid.UUID       `json:"balanceId"`
 	Title      string          `json:"title"`
 	Amount     float64         `json:"amount"`
 	Type       TransactionType `json:"type"`
