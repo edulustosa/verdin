@@ -17,6 +17,7 @@ type Service interface {
 		userID uuid.UUID,
 		month time.Month,
 	) (*entities.Balance, error)
+	Update(ctx context.Context, balance entities.Balance) (*entities.Balance, error)
 }
 
 type service struct {
@@ -55,4 +56,11 @@ func (s *service) FindByMonth(
 
 func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.Balance, error) {
 	return s.repo.FindByID(ctx, id)
+}
+
+func (s *service) Update(
+	ctx context.Context,
+	balance entities.Balance,
+) (*entities.Balance, error) {
+	return s.repo.Update(ctx, balance)
 }

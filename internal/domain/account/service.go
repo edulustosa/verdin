@@ -10,6 +10,7 @@ import (
 type Service interface {
 	Create(context.Context, entities.Account) (*entities.Account, error)
 	FindByID(context.Context, uuid.UUID) (*entities.Account, error)
+	Update(context.Context, entities.Account) (*entities.Account, error)
 }
 
 type service struct {
@@ -31,4 +32,11 @@ func (s *service) Create(
 
 func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.Account, error) {
 	return s.repo.FindByID(ctx, id)
+}
+
+func (s *service) Update(
+	ctx context.Context,
+	account entities.Account,
+) (*entities.Account, error) {
+	return s.repo.Update(ctx, account)
 }

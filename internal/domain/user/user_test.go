@@ -29,8 +29,8 @@ func TestCreateUser(t *testing.T) {
 
 func build() user.Service {
 	return user.NewService(
-		new(user.MemoryRepo),
-		balance.NewService(new(balance.MemoryRepo)),
-		account.NewService(new(account.MemoryRepo)),
+		user.NewMemoryRepo(),
+		balance.NewService(balance.NewMemoryRepo()),
+		account.NewService(account.NewMemoryRepo()),
 	)
 }

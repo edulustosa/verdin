@@ -49,7 +49,7 @@ func TestCreateBalance(t *testing.T) {
 
 func createUser(ctx context.Context, t testing.TB) uuid.UUID {
 	t.Helper()
-	userRepo := new(user.MemoryRepo)
+	userRepo := user.NewMemoryRepo()
 
 	id, _ := userRepo.Create(ctx, entities.User{
 		Username:     "John Doe",
@@ -62,6 +62,6 @@ func createUser(ctx context.Context, t testing.TB) uuid.UUID {
 
 func buildSUT(t testing.TB) balance.Service {
 	t.Helper()
-	repo := new(balance.MemoryRepo)
+	repo := balance.NewMemoryRepo()
 	return balance.NewService(repo)
 }
