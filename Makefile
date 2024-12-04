@@ -10,3 +10,6 @@ ensure-golangci-is-installed:
 
 lint: ensure-golangci-is-installed
 	$(GOLANGCI_BIN) run ./...
+
+test:
+	go test -v ./...
