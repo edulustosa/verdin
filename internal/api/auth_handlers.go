@@ -3,11 +3,12 @@ package api
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/edulustosa/verdin/internal/auth"
 	"github.com/edulustosa/verdin/internal/dtos"
 	"github.com/edulustosa/verdin/internal/factories"
-	"golang.org/x/exp/slog"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func (api *API) Register(w http.ResponseWriter, r *http.Request) {
@@ -30,10 +31,54 @@ func (api *API) Register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		slog.Error("failed to register user", "error", err)
-		api.InternalServerError(w)
+		api.InternalServerError(w, "failed to register user", "error", err)
 		return
 	}
 
 	Encode(w, http.StatusCreated, JSON{"userId": userID})
+}
+
+func (api *API) Login(w http.ResponseWriter, r *http.Request) {
+	req, problems, err := Decode[dtos.Login](r)
+	if err != nil {
+		api.InvalidRequest(w, problems)
+		return
+	}
+
+	userService := factories.MakeUserService(api.Database)
+	authService := auth.New(userService)
+
+	userID, err := authService.Login(r.Context(), &req)
+	if err != nil {
+		if errors.Is(err, auth.ErrInvalidCredentials) {
+			api.Error(w, http.StatusUnauthorized, Error{
+				StatusCode: http.StatusUnauthorized,
+				Message:    "invalid credentials",
+			})
+			return
+		}
+
+		api.InternalServerError(w, "failed to login", "error", err)
+		return
+	}
+
+	token, err := createToken(userID.String(), api.JWTKey)
+	if err != nil {
+		api.InternalServerError(w, "failed to create token", "error", err)
+		return
+	}
+
+	Encode(w, http.StatusOK, JSON{"userId": userID, "token": token})
+}
+
+func createToken(userID, jwtKey string) (string, error) {
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"sub": userID,
+			"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
+		},
+	)
+
+	return token.SignedString([]byte(jwtKey))
 }

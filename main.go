@@ -61,6 +61,7 @@ func run(ctx context.Context) error {
 
 	r := router.NewServer(&api.API{
 		Database: pool,
+		JWTKey:   env.JWTSecret,
 	})
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", env.Port),

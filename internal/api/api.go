@@ -7,15 +7,21 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/exp/slog"
 )
 
 type API struct {
 	Database *pgxpool.Pool
+	JWTKey   string
 }
 
 var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type JSON map[string]any
+
+type contextKey string
+
+const UserIDKey contextKey = "userId"
 
 func Encode[T any](w http.ResponseWriter, status int, v T) {
 	w.Header().Set("Content-Type", "application/json")
@@ -79,7 +85,9 @@ func (api *API) InvalidRequest(w http.ResponseWriter, problems map[string]string
 	api.Error(w, http.StatusBadRequest, errors...)
 }
 
-func (api *API) InternalServerError(w http.ResponseWriter) {
+func (api *API) InternalServerError(w http.ResponseWriter, logMsg string, args ...any) {
+	slog.Error(logMsg, args...)
+
 	api.Error(w, http.StatusInternalServerError, Error{
 		StatusCode: http.StatusInternalServerError,
 		Message:    "something went wrong, please try again later",

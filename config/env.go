@@ -8,6 +8,7 @@ import (
 
 type Env struct {
 	DatabaseURL string `mapstructure:"DATABASE_URL"`
+	JWTSecret   string `mapstructure:"JWT_SECRET"`
 	Port        string `mapstructure:"PORT"`
 }
 
