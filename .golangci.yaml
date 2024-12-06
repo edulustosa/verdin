@@ -3,3 +3,8 @@ linters:
     - revive
     - gosec
     - gocritic
+
+linters-settings:
+  gocritic:
+    disabled-checks:
+      - exitAfterDefer

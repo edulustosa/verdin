@@ -8,9 +8,9 @@ import (
 )
 
 type Service interface {
-	Create(context.Context, entities.Account) (*entities.Account, error)
+	Create(context.Context, entities.Account) (uuid.UUID, error)
 	FindByID(context.Context, uuid.UUID) (*entities.Account, error)
-	Update(context.Context, entities.Account) (*entities.Account, error)
+	Update(context.Context, entities.Account) error
 }
 
 type service struct {
@@ -23,10 +23,7 @@ func NewService(repo Repository) Service {
 	}
 }
 
-func (s *service) Create(
-	ctx context.Context,
-	account entities.Account,
-) (*entities.Account, error) {
+func (s *service) Create(ctx context.Context, account entities.Account) (uuid.UUID, error) {
 	return s.repo.Create(ctx, account)
 }
 
@@ -37,6 +34,6 @@ func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.Account
 func (s *service) Update(
 	ctx context.Context,
 	account entities.Account,
-) (*entities.Account, error) {
+) error {
 	return s.repo.Update(ctx, account)
 }

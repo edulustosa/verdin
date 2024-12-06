@@ -67,10 +67,11 @@ func (s *service) CreateTransaction(
 		return nil, ErrAccountNotFound
 	}
 
+	lastMonth := time.Now().AddDate(0, -1, 0)
 	balance, err := s.balance.FindByMonth(
 		ctx,
 		user.ID,
-		time.Now().Month(),
+		lastMonth,
 	)
 	if err != nil {
 		return nil, err
@@ -106,8 +107,7 @@ func (s *service) updateBalance(
 		return ErrInsufficientFunds
 	}
 
-	_, err := s.balance.Update(ctx, *balance)
-	return err
+	return s.balance.Update(ctx, *balance)
 }
 
 func (s *service) updateAccount(
@@ -119,6 +119,5 @@ func (s *service) updateAccount(
 		return ErrInsufficientFunds
 	}
 
-	_, err := s.account.Update(ctx, *account)
-	return err
+	return s.account.Update(ctx, *account)
 }

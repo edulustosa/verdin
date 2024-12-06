@@ -1,0 +1,6 @@
+root = "."
+tmp_dir = "bin"
+
+[build]
+cmd = "go build -o ./bin/verdin ./main.go"
+bin = "bin/verdin"

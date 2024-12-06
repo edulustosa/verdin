@@ -15,9 +15,9 @@ type Auth struct {
 	user user.Service
 }
 
-func New(userRepo user.Repository) *Auth {
+func New(user user.Service) *Auth {
 	return &Auth{
-		userRepo,
+		user,
 	}
 }
 

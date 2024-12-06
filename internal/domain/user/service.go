@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/edulustosa/verdin/internal/domain/account"
 	"github.com/edulustosa/verdin/internal/domain/balance"
@@ -47,11 +48,13 @@ func (s *service) Create(ctx context.Context, user entities.User) (uuid.UUID, er
 		return uuid.Nil, err
 	}
 
+	fmt.Println("got here")
 	_, err = s.balance.Create(ctx, userID)
 	if err != nil {
 		return uuid.Nil, err
 	}
 
+	fmt.Println("got here 2")
 	_, err = s.account.Create(ctx, entities.Account{
 		UserID: userID,
 		Title:  "Wallet",

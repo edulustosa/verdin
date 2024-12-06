@@ -18,9 +18,7 @@ func NewServer(api *api.API) http.Handler {
 		middleware.Recoverer,
 	)
 
-	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("pong\n"))
-	})
+	r.Post("/register", api.Register)
 
 	return r
 }
