@@ -7,7 +7,7 @@ import (
 )
 
 type Category struct {
-	ID        uuid.UUID `json:"id"`
+	ID        int       `json:"id"`
 	UserID    uuid.UUID `json:"userId"`
 	Name      string    `json:"name"`
 	Theme     string    `json:"theme"`

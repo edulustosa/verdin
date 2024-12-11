@@ -3,6 +3,7 @@ package factories
 import (
 	"github.com/edulustosa/verdin/internal/domain/account"
 	"github.com/edulustosa/verdin/internal/domain/balance"
+	"github.com/edulustosa/verdin/internal/domain/category"
 	"github.com/edulustosa/verdin/internal/domain/user"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -23,4 +24,11 @@ func MakeBalanceService(db *pgxpool.Pool) balance.Service {
 func MakeAccountService(db *pgxpool.Pool) account.Service {
 	repo := account.NewRepo(db)
 	return account.NewService(repo)
+}
+
+func MakeCategoriesService(db *pgxpool.Pool) category.Service {
+	repo := category.NewRepo(db)
+	userRepo := user.NewRepo(db)
+
+	return category.NewService(repo, userRepo)
 }

@@ -1,10 +1,7 @@
 package dtos
 
-import "github.com/google/uuid"
-
 type CreateCategory struct {
-	UserID uuid.UUID `json:"userId"`
-	Name   string    `json:"name"`
-	Theme  string    `json:"theme"`
-	Icon   string    `json:"icon"`
+	Name  string `json:"name" validate:"required,min=3,max=255"`
+	Theme string `json:"theme" validate:"required,min=3,max=255"`
+	Icon  string `json:"icon" validate:"required,min=3,max=255"`
 }

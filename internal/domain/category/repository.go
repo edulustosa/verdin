@@ -2,49 +2,88 @@ package category
 
 import (
 	"context"
-	"errors"
-	"time"
 
 	"github.com/edulustosa/verdin/internal/domain/entities"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository interface {
-	Create(context.Context, entities.Category) (*entities.Category, error)
+	Create(context.Context, entities.Category) (int, error)
 	FindByName(ctx context.Context, userID uuid.UUID, name string) (*entities.Category, error)
-	FindByID(context.Context, uuid.UUID) (*entities.Category, error)
+	FindByID(context.Context, int) (*entities.Category, error)
 }
 
-type memoryRepo struct {
-	categories []entities.Category
+type repo struct {
+	db *pgxpool.Pool
 }
 
-func NewMemoryRepo() Repository {
-	return &memoryRepo{}
-}
-
-func (r *memoryRepo) Create(_ context.Context, category entities.Category) (*entities.Category, error) {
-	category.ID = uuid.New()
-	category.CreatedAt = time.Now()
-	category.UpdatedAt = time.Now()
-	r.categories = append(r.categories, category)
-	return &category, nil
-}
-
-func (r *memoryRepo) FindByName(_ context.Context, userID uuid.UUID, name string) (*entities.Category, error) {
-	for _, c := range r.categories {
-		if c.UserID == userID && c.Name == name {
-			return &c, nil
-		}
+func NewRepo(db *pgxpool.Pool) Repository {
+	return &repo{
+		db,
 	}
-	return nil, errors.New("category not found")
 }
 
-func (r *memoryRepo) FindByID(_ context.Context, id uuid.UUID) (*entities.Category, error) {
-	for _, c := range r.categories {
-		if c.ID == id {
-			return &c, nil
-		}
-	}
-	return nil, errors.New("category not found")
+const create = `
+	INSERT INTO categories (
+		user_id,
+		name,
+		theme,
+		icon	
+	) VALUES ($1, $2, $3, $4) RETURNING id;
+`
+
+func (r *repo) Create(ctx context.Context, category entities.Category) (int, error) {
+	var id int
+	err := r.db.QueryRow(
+		ctx,
+		create,
+		category.UserID,
+		category.Name,
+		category.Theme,
+		category.Icon,
+	).Scan(&id)
+
+	return id, err
+}
+
+const findByName = "SELECT * FROM categories WHERE user_id = $1 AND name = $2;"
+
+func (r *repo) FindByName(
+	ctx context.Context,
+	userID uuid.UUID,
+	name string,
+) (*entities.Category, error) {
+	row := r.db.QueryRow(
+		ctx,
+		findByName,
+		userID,
+		name,
+	)
+
+	return scanCategory(row)
+}
+
+func scanCategory(row pgx.Row) (*entities.Category, error) {
+	var category entities.Category
+	err := row.Scan(
+		&category.ID,
+		&category.UserID,
+		&category.Name,
+		&category.Theme,
+		&category.Icon,
+		&category.CreatedAt,
+		&category.UpdatedAt,
+	)
+
+	return &category, err
+}
+
+const findByID = "SELECT * FROM categories WHERE id = $1;"
+
+func (r *repo) FindByID(ctx context.Context, id int) (*entities.Category, error) {
+	row := r.db.QueryRow(ctx, findByID, id)
+
+	return scanCategory(row)
 }

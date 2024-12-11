@@ -7,7 +7,7 @@ import (
 
 type CreateTransaction struct {
 	UserID     uuid.UUID                `json:"userId"`
-	CategoryID uuid.UUID                `json:"categoryId"`
+	CategoryID int                      `json:"categoryId"`
 	AccountID  uuid.UUID                `json:"accountId"`
 	Title      string                   `json:"title"`
 	Amount     float64                  `json:"amount"`

@@ -20,6 +20,7 @@ func (api *API) Register(w http.ResponseWriter, r *http.Request) {
 
 	userService := factories.MakeUserService(api.Database)
 	authService := auth.New(userService)
+	categoryService := factories.MakeCategoriesService(api.Database)
 
 	userID, err := authService.Register(r.Context(), &req)
 	if err != nil {
@@ -32,6 +33,12 @@ func (api *API) Register(w http.ResponseWriter, r *http.Request) {
 		}
 
 		api.InternalServerError(w, "failed to register user", "error", err)
+		return
+	}
+
+	err = categoryService.CreateDefaultCategories(r.Context(), userID)
+	if err != nil {
+		api.InternalServerError(w, "failed to create default categories", "error", err)
 		return
 	}
 

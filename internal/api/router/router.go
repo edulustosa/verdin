@@ -27,9 +27,7 @@ func NewServer(api *api.API) http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(middlewares.Auth)
 
-		r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
-			_, _ = w.Write([]byte("pong"))
-		})
+		r.Post("/category", api.CreateCategory)
 	})
 
 	return r

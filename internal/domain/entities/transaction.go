@@ -9,7 +9,7 @@ import (
 type Transaction struct {
 	ID         int             `json:"id"`
 	UserID     uuid.UUID       `json:"userId"`
-	CategoryID uuid.UUID       `json:"categoryId"`
+	CategoryID int             `json:"categoryId"`
 	AccountID  uuid.UUID       `json:"accountId"`
 	BalanceID  uuid.UUID       `json:"balanceId"`
 	Title      string          `json:"title"`
