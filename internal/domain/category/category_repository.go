@@ -2,6 +2,7 @@ package category
 
 import (
 	"context"
+	"time"
 
 	"github.com/edulustosa/verdin/internal/domain/entities"
 	"github.com/google/uuid"
@@ -13,6 +14,7 @@ type Repository interface {
 	Create(context.Context, entities.Category) (int, error)
 	FindByName(ctx context.Context, userID uuid.UUID, name string) (*entities.Category, error)
 	FindByID(context.Context, int) (*entities.Category, error)
+	Update(context.Context, entities.Category) error
 }
 
 type repo struct {
@@ -86,4 +88,29 @@ func (r *repo) FindByID(ctx context.Context, id int) (*entities.Category, error)
 	row := r.db.QueryRow(ctx, findByID, id)
 
 	return scanCategory(row)
+}
+
+const update = `
+	UPDATE categories 
+	SET name = $1, 
+		theme = $2,
+		icon = $3,
+		updated_at = $4
+	WHERE id = $5;
+`
+
+func (r *repo) Update(ctx context.Context, category entities.Category) error {
+	category.UpdatedAt = time.Now()
+
+	_, err := r.db.Exec(
+		ctx,
+		update,
+		category.Name,
+		category.Theme,
+		category.Icon,
+		category.UpdatedAt,
+		category.ID,
+	)
+
+	return err
 }

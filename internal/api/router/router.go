@@ -28,6 +28,7 @@ func NewServer(api *api.API) http.Handler {
 		r.Use(middlewares.Auth)
 
 		r.Post("/category", api.CreateCategory)
+		r.Put("/category/{id}", api.UpdateCategory)
 	})
 
 	return r

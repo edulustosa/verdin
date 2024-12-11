@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS categories (
     "id" SERIAL PRIMARY KEY NOT NULL,
-    "user_id" UUID,
+    "user_id" UUID NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "theme" VARCHAR(255) NOT NULL,
     "icon" VARCHAR(255) NOT NULL,

@@ -15,6 +15,12 @@ type Service interface {
 	Create(ctx context.Context, userID uuid.UUID, req *dtos.CreateCategory) (int, error)
 	FindByID(context.Context, int) (*entities.Category, error)
 	CreateDefaultCategories(ctx context.Context, userID uuid.UUID) error
+	Update(
+		ctx context.Context,
+		id int,
+		userID uuid.UUID,
+		req *dtos.UpdateCategory,
+	) error
 }
 
 type service struct {
@@ -32,6 +38,7 @@ func NewService(repo Repository, user user.Service) Service {
 var (
 	ErrUserNotFound          = errors.New("user not found")
 	ErrCategoryAlreadyExists = errors.New("category already exists")
+	ErrCategoryNotFound      = errors.New("category not found")
 )
 
 func (s *service) Create(
@@ -114,4 +121,27 @@ func (s *service) CreateDefaultCategories(
 	}
 
 	return nil
+}
+
+func (s *service) Update(
+	ctx context.Context,
+	id int,
+	userID uuid.UUID,
+	req *dtos.UpdateCategory,
+) error {
+	_, err := s.user.FindByID(ctx, userID)
+	if err != nil {
+		return ErrUserNotFound
+	}
+
+	category, err := s.repo.FindByID(ctx, id)
+	if err != nil || category.UserID != userID {
+		return ErrCategoryNotFound
+	}
+
+	category.Name = req.Name
+	category.Theme = req.Theme
+	category.Icon = req.Icon
+
+	return s.repo.Update(ctx, *category)
 }
