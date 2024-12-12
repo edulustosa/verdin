@@ -15,6 +15,7 @@ type Repository interface {
 	FindByName(ctx context.Context, userID uuid.UUID, name string) (*entities.Category, error)
 	FindByID(context.Context, int) (*entities.Category, error)
 	Update(context.Context, entities.Category) error
+	FindMany(ctx context.Context, userID uuid.UUID) ([]entities.Category, error)
 }
 
 type repo struct {
@@ -113,4 +114,34 @@ func (r *repo) Update(ctx context.Context, category entities.Category) error {
 	)
 
 	return err
+}
+
+const findMany = "SELECT * FROM categories WHERE user_id = $1;"
+
+func (r *repo) FindMany(ctx context.Context, userID uuid.UUID) ([]entities.Category, error) {
+	rows, err := r.db.Query(ctx, findMany, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var categories []entities.Category
+	for rows.Next() {
+		var category entities.Category
+		err = rows.Scan(
+			&category.ID,
+			&category.UserID,
+			&category.Name,
+			&category.Theme,
+			&category.Icon,
+			&category.CreatedAt,
+			&category.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		categories = append(categories, category)
+	}
+
+	return categories, nil
 }

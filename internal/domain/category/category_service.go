@@ -21,6 +21,7 @@ type Service interface {
 		userID uuid.UUID,
 		req *dtos.UpdateCategory,
 	) error
+	GetAll(ctx context.Context, userID uuid.UUID) ([]entities.Category, error)
 }
 
 type service struct {
@@ -144,4 +145,11 @@ func (s *service) Update(
 	category.Icon = req.Icon
 
 	return s.repo.Update(ctx, *category)
+}
+
+func (s *service) GetAll(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]entities.Category, error) {
+	return s.repo.FindMany(ctx, userID)
 }

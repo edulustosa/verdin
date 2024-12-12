@@ -81,3 +81,39 @@ func (api *API) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (api *API) GetCategories(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(UserIDKey).(uuid.UUID)
+
+	categoryService := factories.MakeCategoriesService(api.Database)
+	categories, err := categoryService.GetAll(r.Context(), userID)
+	if err != nil {
+		api.InternalServerError(w, "failed to get categories", "error", err)
+		return
+	}
+
+	Encode(w, http.StatusOK, JSON{"categories": categories})
+}
+
+func (api *API) GetCategory(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		api.Error(w, http.StatusBadRequest, Error{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid category id",
+		})
+		return
+	}
+
+	categoryService := factories.MakeCategoriesService(api.Database)
+	category, err := categoryService.FindByID(r.Context(), id)
+	if err != nil {
+		api.Error(w, http.StatusNotFound, Error{
+			StatusCode: http.StatusNotFound,
+			Message:    "category not found",
+		})
+		return
+	}
+
+	Encode(w, http.StatusOK, category)
+}

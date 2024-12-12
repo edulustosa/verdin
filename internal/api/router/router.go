@@ -29,6 +29,8 @@ func NewServer(api *api.API) http.Handler {
 
 		r.Post("/category", api.CreateCategory)
 		r.Put("/category/{id}", api.UpdateCategory)
+		r.Get("/category", api.GetCategories)
+		r.Get("/category/{id}", api.GetCategory)
 	})
 
 	return r
