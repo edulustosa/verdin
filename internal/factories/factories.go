@@ -4,6 +4,7 @@ import (
 	"github.com/edulustosa/verdin/internal/domain/account"
 	"github.com/edulustosa/verdin/internal/domain/balance"
 	"github.com/edulustosa/verdin/internal/domain/category"
+	"github.com/edulustosa/verdin/internal/domain/transaction"
 	"github.com/edulustosa/verdin/internal/domain/user"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -31,4 +32,20 @@ func MakeCategoriesService(db *pgxpool.Pool) category.Service {
 	userRepo := user.NewRepo(db)
 
 	return category.NewService(repo, userRepo)
+}
+
+func MakeTransactionService(db *pgxpool.Pool) transaction.Service {
+	repo := transaction.NewRepo(db)
+	userService := MakeUserService(db)
+	categoryService := MakeCategoriesService(db)
+	accountService := MakeAccountService(db)
+	balanceService := MakeBalanceService(db)
+
+	return transaction.NewService(
+		repo,
+		userService,
+		categoryService,
+		accountService,
+		balanceService,
+	)
 }

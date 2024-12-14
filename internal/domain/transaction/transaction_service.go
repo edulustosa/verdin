@@ -11,10 +11,16 @@ import (
 	"github.com/edulustosa/verdin/internal/domain/entities"
 	"github.com/edulustosa/verdin/internal/domain/user"
 	"github.com/edulustosa/verdin/internal/dtos"
+	"github.com/edulustosa/verdin/pkg/utils"
+	"github.com/google/uuid"
 )
 
 type Service interface {
-	CreateTransaction(context.Context, *dtos.CreateTransaction) (*entities.Transaction, error)
+	CreateTransaction(
+		ctx context.Context,
+		userID uuid.UUID,
+		req *dtos.CreateTransaction,
+	) (uuid.UUID, error)
 }
 
 type service struct {
@@ -50,31 +56,31 @@ var (
 
 func (s *service) CreateTransaction(
 	ctx context.Context,
+	userID uuid.UUID,
 	transactionReq *dtos.CreateTransaction,
-) (*entities.Transaction, error) {
-	user, err := s.user.FindByID(ctx, transactionReq.UserID)
+) (uuid.UUID, error) {
+	user, err := s.user.FindByID(ctx, userID)
 	if err != nil {
-		return nil, ErrUserNotFound
+		return uuid.Nil, ErrUserNotFound
 	}
 
 	category, err := s.category.FindByID(ctx, transactionReq.CategoryID)
 	if err != nil {
-		return nil, ErrCategoryNotFound
+		return uuid.Nil, ErrCategoryNotFound
 	}
 
 	account, err := s.account.FindByID(ctx, transactionReq.AccountID)
 	if err != nil {
-		return nil, ErrAccountNotFound
+		return uuid.Nil, ErrAccountNotFound
 	}
 
-	lastMonth := time.Now().AddDate(0, -1, 0)
 	balance, err := s.balance.FindByMonth(
 		ctx,
 		user.ID,
-		lastMonth,
+		utils.FirstDayOfMonth(time.Now()),
 	)
 	if err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
 
 	transaction := entities.Transaction{
@@ -88,11 +94,11 @@ func (s *service) CreateTransaction(
 	}
 
 	if err := s.updateAccount(ctx, account, &transaction); err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
 
 	if err := s.updateBalance(ctx, balance, &transaction); err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
 
 	return s.repo.Create(ctx, transaction)

@@ -54,7 +54,7 @@ func (s *service) Create(ctx context.Context, user entities.User) (uuid.UUID, er
 
 	_, err = s.account.Create(ctx, entities.Account{
 		UserID: userID,
-		Title:  "Wallet",
+		Title:  "Carteira",
 	})
 
 	return userID, err

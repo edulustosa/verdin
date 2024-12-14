@@ -3,11 +3,11 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"golang.org/x/exp/slog"
 )
 
 type API struct {
@@ -91,5 +91,12 @@ func (api *API) InternalServerError(w http.ResponseWriter, logMsg string, args .
 	api.Error(w, http.StatusInternalServerError, Error{
 		StatusCode: http.StatusInternalServerError,
 		Message:    "something went wrong, please try again later",
+	})
+}
+
+func (api *API) NotFound(w http.ResponseWriter, err error) {
+	api.Error(w, http.StatusNotFound, Error{
+		StatusCode: http.StatusNotFound,
+		Message:    err.Error(),
 	})
 }
