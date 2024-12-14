@@ -32,6 +32,11 @@ func NewServer(api *api.API) http.Handler {
 		r.Get("/category", api.GetCategories)
 		r.Get("/category/{id}", api.GetCategory)
 
+		r.Get("/accounts", api.GetAccounts)
+		r.Get("/accounts/{accountId}", api.GetAccount)
+		r.Post("/accounts", api.CreateAccount)
+		r.Put("/accounts/{accountId}", api.EditAccount)
+
 		r.Post("/transaction", api.AddTransaction)
 	})
 

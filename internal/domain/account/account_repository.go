@@ -12,6 +12,8 @@ type Repository interface {
 	Create(context.Context, entities.Account) (uuid.UUID, error)
 	FindByID(context.Context, uuid.UUID) (*entities.Account, error)
 	Update(context.Context, entities.Account) error
+	FindMany(ctx context.Context, userID uuid.UUID) ([]entities.Account, error)
+	FindByTitle(ctx context.Context, userID uuid.UUID, title string) (*entities.Account, error)
 }
 
 type repo struct {
@@ -62,7 +64,7 @@ func (r *repo) FindByID(ctx context.Context, id uuid.UUID) (*entities.Account, e
 const update = `
 	UPDATE accounts
 	SET title = $1, balance = $2
-	WHERE id = $3
+	WHERE id = $3;
 `
 
 func (r *repo) Update(ctx context.Context, account entities.Account) error {
@@ -71,8 +73,67 @@ func (r *repo) Update(ctx context.Context, account entities.Account) error {
 		update,
 		account.Title,
 		account.Balance,
-		account,
+		account.ID,
 	)
 
 	return err
+}
+
+const findMany = "SELECT * FROM accounts WHERE user_id = $1"
+
+func (r *repo) FindMany(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]entities.Account, error) {
+	rows, err := r.db.Query(ctx, findMany, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var accounts []entities.Account
+	for rows.Next() {
+		var account entities.Account
+		err = rows.Scan(
+			&account.ID,
+			&account.UserID,
+			&account.Title,
+			&account.Balance,
+			&account.CreatedAt,
+			&account.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		accounts = append(accounts, account)
+	}
+
+	return accounts, nil
+}
+
+const findByTitle = "SELECT * FROM accounts WHERE user_id = $1 AND title = $2;"
+
+func (r *repo) FindByTitle(
+	ctx context.Context,
+	userID uuid.UUID,
+	title string,
+) (*entities.Account, error) {
+	row := r.db.QueryRow(
+		ctx,
+		findByTitle,
+		userID,
+		title,
+	)
+
+	var account entities.Account
+	err := row.Scan(
+		&account.ID,
+		&account.UserID,
+		&account.Title,
+		&account.Balance,
+		&account.CreatedAt,
+		&account.UpdatedAt,
+	)
+
+	return &account, err
 }
