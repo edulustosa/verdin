@@ -44,17 +44,15 @@ func (r *repo) Create(
 	ctx context.Context,
 	balance entities.Balance,
 ) (uuid.UUID, error) {
-	row := r.db.QueryRow(
+	var id uuid.UUID
+	err := r.db.QueryRow(
 		ctx,
 		create,
 		balance.UserID,
 		balance.Current,
 		balance.Income,
 		balance.Expenses,
-	)
-
-	var id uuid.UUID
-	err := row.Scan(&id)
+	).Scan(&id)
 
 	return id, err
 }

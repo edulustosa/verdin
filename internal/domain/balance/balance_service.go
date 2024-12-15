@@ -2,6 +2,8 @@ package balance
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/edulustosa/verdin/internal/domain/entities"
@@ -43,12 +45,36 @@ func (s *service) Create(ctx context.Context, userID uuid.UUID) (uuid.UUID, erro
 	return s.repo.Create(ctx, balance)
 }
 
+var ErrMonthNotFound = errors.New("month not found")
+
 func (s *service) FindByMonth(
 	ctx context.Context,
 	userID uuid.UUID,
 	month time.Time,
 ) (*entities.Balance, error) {
-	return s.repo.FindByMonth(ctx, userID, month)
+	balance, err := s.repo.FindByMonth(ctx, userID, month)
+	if err == nil {
+		return balance, nil
+	}
+
+	if isSameMonth(month, time.Now()) {
+		createdBalanceID, err := s.repo.Create(ctx, entities.Balance{
+			UserID:   userID,
+			Income:   0,
+			Expenses: 0,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create balance: %w", err)
+		}
+
+		return s.repo.FindByID(ctx, createdBalanceID)
+	}
+
+	return nil, ErrMonthNotFound
+}
+
+func isSameMonth(a, b time.Time) bool {
+	return a.Year() == b.Year() && a.Month() == b.Month()
 }
 
 func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.Balance, error) {

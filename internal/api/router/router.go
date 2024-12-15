@@ -38,6 +38,8 @@ func NewServer(api *api.API) http.Handler {
 		r.Put("/accounts/{accountId}", api.EditAccount)
 
 		r.Post("/transaction", api.AddTransaction)
+
+		r.Get("/balance", api.GetBalance)
 	})
 
 	return r

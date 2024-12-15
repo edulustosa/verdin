@@ -85,8 +85,8 @@ func (api *API) InvalidRequest(w http.ResponseWriter, problems map[string]string
 	api.Error(w, http.StatusBadRequest, errors...)
 }
 
-func (api *API) InternalServerError(w http.ResponseWriter, logMsg string, args ...any) {
-	slog.Error(logMsg, args...)
+func (api *API) InternalServerError(w http.ResponseWriter, logMsg string, slogArgs ...any) {
+	slog.Error(logMsg, slogArgs...)
 
 	api.Error(w, http.StatusInternalServerError, Error{
 		StatusCode: http.StatusInternalServerError,
