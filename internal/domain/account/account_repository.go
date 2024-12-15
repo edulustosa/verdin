@@ -89,6 +89,7 @@ func (r *repo) FindMany(
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var accounts []entities.Account
 	for rows.Next() {

@@ -24,7 +24,9 @@ func MakeBalanceService(db *pgxpool.Pool) balance.Service {
 
 func MakeAccountService(db *pgxpool.Pool) account.Service {
 	repo := account.NewRepo(db)
-	return account.NewService(repo)
+	balanceService := MakeBalanceService(db)
+
+	return account.NewService(repo, balanceService)
 }
 
 func MakeCategoriesService(db *pgxpool.Pool) category.Service {

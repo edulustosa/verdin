@@ -22,6 +22,11 @@ type Service interface {
 		userID uuid.UUID,
 		req *dtos.CreateTransaction,
 	) (int, error)
+	GetMonthlyTransactions(
+		ctx context.Context,
+		userID uuid.UUID,
+		month time.Time,
+	) ([]entities.Transaction, error)
 }
 
 type service struct {
@@ -140,4 +145,12 @@ func (s *service) updateAccount(
 	}
 
 	return s.account.Update(ctx, *account)
+}
+
+func (s *service) GetMonthlyTransactions(
+	ctx context.Context,
+	userID uuid.UUID,
+	month time.Time,
+) ([]entities.Transaction, error) {
+	return s.repo.FindManyByMonth(ctx, userID, month)
 }

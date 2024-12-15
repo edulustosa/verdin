@@ -3,7 +3,11 @@ package account
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
+	"github.com/Rhymond/go-money"
+	"github.com/edulustosa/verdin/internal/domain/balance"
 	"github.com/edulustosa/verdin/internal/domain/entities"
 	"github.com/edulustosa/verdin/internal/dtos"
 	"github.com/google/uuid"
@@ -19,12 +23,14 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
+	repo    Repository
+	balance balance.Service
 }
 
-func NewService(repo Repository) Service {
+func NewService(repo Repository, balance balance.Service) Service {
 	return &service{
 		repo,
+		balance,
 	}
 }
 
@@ -85,6 +91,10 @@ func (s *service) NewAccount(
 		return uuid.Nil, ErrAccountAlreadyExists
 	}
 
+	if err := s.updateBalance(ctx, userID, req.Amount); err != nil {
+		return uuid.Nil, fmt.Errorf("failed to update balance: %w", err)
+	}
+
 	account := entities.Account{
 		UserID:  userID,
 		Title:   req.Title,
@@ -92,4 +102,23 @@ func (s *service) NewAccount(
 	}
 
 	return s.repo.Create(ctx, account)
+}
+
+func (s *service) updateBalance(
+	ctx context.Context,
+	userID uuid.UUID,
+	accountAmount float64,
+) error {
+	balance, err := s.balance.FindByMonth(ctx, userID, time.Now())
+	if err != nil {
+		return fmt.Errorf("failed to find balance: %w", err)
+	}
+
+	currentBalance := money.NewFromFloat(balance.Current, money.BRL)
+	accountAmountMoney := money.NewFromFloat(accountAmount, money.BRL)
+
+	currentBalance, _ = currentBalance.Add(accountAmountMoney)
+	balance.Current = currentBalance.AsMajorUnits()
+
+	return s.balance.Update(ctx, *balance)
 }
