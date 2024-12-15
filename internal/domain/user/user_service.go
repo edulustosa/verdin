@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/edulustosa/verdin/internal/domain/account"
 	"github.com/edulustosa/verdin/internal/domain/balance"
@@ -44,18 +45,21 @@ func (s *service) FindByID(ctx context.Context, id uuid.UUID) (*entities.User, e
 func (s *service) Create(ctx context.Context, user entities.User) (uuid.UUID, error) {
 	userID, err := s.repo.Create(ctx, user)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	_, err = s.balance.Create(ctx, userID)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, fmt.Errorf("failed to create balance: %w", err)
 	}
 
 	_, err = s.account.Create(ctx, entities.Account{
 		UserID: userID,
 		Title:  "Carteira",
 	})
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("failed to create account: %w", err)
+	}
 
-	return userID, err
+	return userID, nil
 }

@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/edulustosa/verdin/internal/domain/entities"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository interface {
-	Create(context.Context, entities.Transaction) (uuid.UUID, error)
+	Create(context.Context, entities.Transaction) (int, error)
 }
 
 type repo struct {
@@ -29,13 +28,13 @@ const create = `
 		title,
 		description,
 		amount,
-		type,
+		type
 	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	RETURNING id;
 `
 
-func (r *repo) Create(ctx context.Context, t entities.Transaction) (uuid.UUID, error) {
-	var id uuid.UUID
+func (r *repo) Create(ctx context.Context, t entities.Transaction) (int, error) {
+	var id int
 	err := r.db.QueryRow(
 		ctx,
 		create,

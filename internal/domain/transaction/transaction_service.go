@@ -3,6 +3,7 @@ package transaction
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/edulustosa/verdin/internal/domain/account"
@@ -20,7 +21,7 @@ type Service interface {
 		ctx context.Context,
 		userID uuid.UUID,
 		req *dtos.CreateTransaction,
-	) (uuid.UUID, error)
+	) (int, error)
 }
 
 type service struct {
@@ -58,20 +59,20 @@ func (s *service) CreateTransaction(
 	ctx context.Context,
 	userID uuid.UUID,
 	transactionReq *dtos.CreateTransaction,
-) (uuid.UUID, error) {
+) (int, error) {
 	user, err := s.user.FindByID(ctx, userID)
 	if err != nil {
-		return uuid.Nil, ErrUserNotFound
+		return 0, ErrUserNotFound
 	}
 
 	category, err := s.category.FindByID(ctx, transactionReq.CategoryID)
 	if err != nil {
-		return uuid.Nil, ErrCategoryNotFound
+		return 0, ErrCategoryNotFound
 	}
 
 	account, err := s.account.FindByID(ctx, transactionReq.AccountID)
 	if err != nil {
-		return uuid.Nil, ErrAccountNotFound
+		return 0, ErrAccountNotFound
 	}
 
 	balance, err := s.balance.FindByMonth(
@@ -80,7 +81,7 @@ func (s *service) CreateTransaction(
 		utils.FirstDayOfMonth(time.Now()),
 	)
 	if err != nil {
-		return uuid.Nil, err
+		return 0, fmt.Errorf("failed to find balance: %w", err)
 	}
 
 	transaction := entities.Transaction{
@@ -94,14 +95,27 @@ func (s *service) CreateTransaction(
 	}
 
 	if err := s.updateAccount(ctx, account, &transaction); err != nil {
-		return uuid.Nil, err
+		if err != ErrInsufficientFunds {
+			return 0, fmt.Errorf("failed to update account: %w", err)
+		}
+
+		return 0, ErrInsufficientFunds
 	}
 
 	if err := s.updateBalance(ctx, balance, &transaction); err != nil {
-		return uuid.Nil, err
+		if err != ErrInsufficientFunds {
+			return 0, fmt.Errorf("failed to update balance: %w", err)
+		}
+
+		return 0, ErrInsufficientFunds
 	}
 
-	return s.repo.Create(ctx, transaction)
+	id, err := s.repo.Create(ctx, transaction)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create transaction: %w", err)
+	}
+
+	return id, nil
 }
 
 func (s *service) updateBalance(

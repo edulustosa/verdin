@@ -63,7 +63,7 @@ func (r *repo) FindByID(ctx context.Context, id uuid.UUID) (*entities.Account, e
 
 const update = `
 	UPDATE accounts
-	SET title = $1, balance = $2
+	SET title = $1, balance = $2, updated_at = NOW()
 	WHERE id = $3;
 `
 
