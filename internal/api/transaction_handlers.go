@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/edulustosa/verdin/internal/domain/transaction"
@@ -56,9 +57,17 @@ func (api *API) GetTransactions(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		month = time.Now()
 	}
+	categoryID, _ := strconv.Atoi(r.URL.Query().Get("categoryId"))
 
 	transactionService := factories.MakeTransactionService(api.Database)
-	transactions, err := transactionService.GetMonthlyTransactions(r.Context(), userID, month)
+	transactions, err := transactionService.GetMonthlyTransactions(
+		r.Context(),
+		userID,
+		&dtos.GetMonthlyTransactionsQuery{
+			Month:      month,
+			CategoryID: categoryID,
+		},
+	)
 	if err != nil {
 		api.InternalServerError(w, "failed to get transactions", "error", err)
 		return

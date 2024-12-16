@@ -25,7 +25,7 @@ type Service interface {
 	GetMonthlyTransactions(
 		ctx context.Context,
 		userID uuid.UUID,
-		month time.Time,
+		query *dtos.GetMonthlyTransactionsQuery,
 	) ([]entities.Transaction, error)
 }
 
@@ -150,7 +150,11 @@ func (s *service) updateAccount(
 func (s *service) GetMonthlyTransactions(
 	ctx context.Context,
 	userID uuid.UUID,
-	month time.Time,
+	query *dtos.GetMonthlyTransactionsQuery,
 ) ([]entities.Transaction, error) {
-	return s.repo.FindManyByMonth(ctx, userID, month)
+	if query.CategoryID != 0 {
+		return s.repo.FindManyByMonthAndCategory(ctx, userID, query.Month, query.CategoryID)
+	}
+
+	return s.repo.FindManyByMonth(ctx, userID, query.Month)
 }
